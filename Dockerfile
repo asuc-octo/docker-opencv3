@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 
 #3.4.3
-ENV PYTHON_VERSION 2.7
+ENV PYTHON_VERSION 3.4
 ENV NUM_CORES 4
 
 # Install OpenCV 3.0
@@ -10,7 +10,7 @@ RUN apt-get -y install python$PYTHON_VERSION-dev wget unzip \
                        build-essential cmake git pkg-config libatlas-base-dev gfortran \
                        libjasper-dev libgtk2.0-dev libavcodec-dev libavformat-dev \
                        libswscale-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libv4l-dev
-RUN wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py
+RUN wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py
 RUN pip install numpy matplotlib
 
 RUN wget https://github.com/Itseez/opencv/archive/3.1.0.zip -O opencv3.zip && \
@@ -21,6 +21,7 @@ RUN mkdir /opencv/build
 WORKDIR /opencv/build
 RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D BUILD_PYTHON_SUPPORT=ON \
+	-D PYTHON_EXECUTABLE=/usr/bin/python3 \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
 	-D INSTALL_C_EXAMPLES=OFF \
 	-D INSTALL_PYTHON_EXAMPLES=ON \
