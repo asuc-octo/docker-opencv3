@@ -50,8 +50,8 @@ RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D WITH_TBB=ON \
     -DENABLE_PRECOMPILED_HEADERS=OFF ..
 
-#RUN make -j$NUM_CORES
-RUN make VERBOSE=1
+RUN make -j$NUM_CORES
+# RUN make -j
 RUN make install
 RUN ldconfig
 RUN ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so /opt/conda/lib/python3.6/site-packages/cv2.so
