@@ -15,9 +15,9 @@ RUN apt-get install unzip cmake zlib1g-dev -y
 RUN apt-get install libavcodec-dev libavformat-dev libavdevice-dev -y
 
 RUN wget https://github.com/opencv/opencv/archive/3.4.0.zip -O opencv3.zip && \
-    unzip -q opencv3.zip && mv /opencv-3.4.0 /opencv
+    unzip -q opencv3.zip && mv opencv-3.4.0 /opencv
 RUN wget https://github.com/opencv/opencv_contrib/archive/3.4.0.zip -O opencv_contrib3.zip && \
-    unzip -q opencv_contrib3.zip && mv /opencv_contrib-3.4.0 /opencv_contrib
+    unzip -q opencv_contrib3.zip && mv opencv_contrib-3.4.0 /opencv_contrib
 
 RUN mkdir /opencv/build
 WORKDIR /opencv/build
@@ -34,8 +34,12 @@ RUN apt-get install \
 RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
     -DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") \
-	-D BUILD_PYTHON_SUPPORT=ON \
-	-D PYTHON_EXECUTABLE=/opt/conda/bin/python \
+    -D WITH_CUDA=ON \
+    -D ENABLE_FAST_MATH=1 \
+    -D CUDA_FAST_MATH=1 \
+    -D WITH_CUBLAS=1 \
+    -D BUILD_PYTHON_SUPPORT=ON \
+	-D PYTHON_EXECUTABLE=/home/richard4912/anaconda3/bin/python \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
 	-D INSTALL_C_EXAMPLES=OFF \
 	-D INSTALL_PYTHON_EXAMPLES=OFF \
