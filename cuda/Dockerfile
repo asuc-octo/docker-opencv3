@@ -1,6 +1,7 @@
 FROM nvidia/cuda:9.0-devel-ubuntu17.04
 
 #3.4.3
+SHELL ["/bin/bash", "-c"]
 ENV PYTHON_VERSION 3.5
 ENV NUM_CORES 16
 
@@ -14,19 +15,33 @@ RUN apt-get install ffmpeg -y
 RUN apt-get install unzip cmake zlib1g-dev build-essential wget curl -y
 RUN apt-get install apt-transport-https -y
 
-RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+RUN mkdir /conda
+WORKDIR /conda
 
-RUN echo "deb https://apt.repos.intel.com/intelpython binary/" >> /etc/apt/sources.list
-RUN echo "deb https://apt.repos.intel.com/mkl all main" >> /etc/apt/sources.list
-RUN echo "deb https://apt.repos.intel.com/ipp all main" >> /etc/apt/sources.list
-RUN echo "deb https://apt.repos.intel.com/tbb all main" >> /etc/apt/sources.list
-RUN echo "deb https://apt.repos.intel.com/daal all main" >> /etc/apt/sources.list
-RUN apt-get update -y
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN chmod +x Miniconda3-latest-Linux-x86_64.sh && ./Miniconda3-latest-Linux-x86_64.sh -b -p /miniconda
+# ENV PATH="/miniconda/bin:${PATH}"
 
-RUN apt-get install -y intelpython3 intel-tbb-2018.0-033 intel-mkl-2018.1-038 intel-ipp-2018.1-038
+RUN /miniconda/bin/conda update conda -y
+RUN /miniconda/bin/conda config --add channels intel
+RUN /miniconda/bin/conda create -n idp intelpython3_core python=3 -y
+ENV PATH="/miniconda/envs/idp/bin:${PATH}"
+# RUN source activate idp
 
-ENV PATH="/opt/intel/intelpython3/bin:${PATH}"
+# RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+# RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+
+# RUN echo "deb https://apt.repos.intel.com/intelpython binary/" >> /etc/apt/sources.list
+# # RUN echo "deb https://apt.repos.intel.com/mkl all main" >> /etc/apt/sources.list
+# # RUN echo "deb https://apt.repos.intel.com/ipp all main" >> /etc/apt/sources.list
+# # RUN echo "deb https://apt.repos.intel.com/tbb all main" >> /etc/apt/sources.list
+# # RUN echo "deb https://apt.repos.intel.com/daal all main" >> /etc/apt/sources.list
+# RUN apt-get update -y
+
+# # RUN apt-get install -y intelpython3 intel-tbb-2018.0-033 intel-mkl-2018.1-038 intel-ipp-2018.1-038
+# RUN apt-get -y install intelpython3
+
+# ENV PATH="/opt/intel/intelpython3/bin:${PATH}"
 
 
 # # nvidia you're crap
@@ -56,12 +71,12 @@ RUN wget https://github.com/opencv/opencv_contrib/archive/3.4.0.zip -O opencv_co
 RUN mkdir /opencv/build
 WORKDIR /opencv/build
 
-# # RUN echo $(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")
+# # # RUN echo $(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")
 
-#     # -D CUDA_NVCC_FLAGS="--expt-relaxed-constexpr" \
-#     # -D WITH_NVCUVID=ON\
-#     # -D CUDA_FAST_MATH=1 \
-#     # -D WITH_CUBLAS=1 \
+# #     # -D CUDA_NVCC_FLAGS="--expt-relaxed-constexpr" \
+# #     # -D WITH_NVCUVID=ON\
+# #     # -D CUDA_FAST_MATH=1 \
+# #     # -D WITH_CUBLAS=1 \
 
 RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
@@ -87,12 +102,14 @@ RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -DENABLE_PRECOMPILED_HEADERS=OFF ..
 
 RUN make -j$NUM_CORES
-# # RUN make -j
+# # # RUN make -j
 RUN make install
 
 # RUN apt-get install ssh -y
+RUN ln -s /usr/local/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so /miniconda/envs/idp/lib/python3.6/site-packages/cv2.cpython-36m-x86_64-linux-gnu.so
 
 # Define default command.
+# CMD ["source activate idp && bash"]
 CMD ["bash"]
 
 
